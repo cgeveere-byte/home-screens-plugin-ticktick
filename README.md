@@ -7,7 +7,7 @@ Displays TickTick tasks in list, kanban, agenda, or timeline view.
 - Tag filtering (OR, AND, NOT)
 - Priority-colored checkboxes
 - Multi-project timeline with color coding
-- Live red time bar on timeline (fixed window, no manual scroll)
+- Live current time bar on timeline
 - Last synced timestamp
 
 ## Setup
