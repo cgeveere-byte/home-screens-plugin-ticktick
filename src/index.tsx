@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 
 const { pluginFetch } = window.__HS_SDK__ || {};
+const VERSION = '1.0.0';
 
 function formatDate(iso) {
   if (!iso) return null;
@@ -382,6 +383,7 @@ export default function TickTickList({ config = {}, style = {} }) {
         overflow: 'hidden',
         color: 'inherit',
         fontFamily: 'inherit',
+        position: 'relative',
         ...style,
       }}
     >
@@ -599,6 +601,20 @@ export default function TickTickList({ config = {}, style = {} }) {
           Synced {formatTime(lastSynced)}
         </div>
       )}
+
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 4,
+          left: 8,
+          fontSize: '0.65em',
+          opacity: 0.35,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+      >
+        v{VERSION}
+      </div>
     </div>
   );
 }
