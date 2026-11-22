@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 const { pluginFetch } = window.__HS_SDK__ || {};
 
@@ -121,10 +121,23 @@ export default function TickTickList({ config = {}, style = {} }) {
   const [loading, setLoading] = useState(false);
   const [lastSynced, setLastSynced] = useState(null);
   const [now, setNow] = useState(new Date());
+  const [timelineHeight, setTimelineHeight] = useState(0);
+  const timelineRef = useRef(null);
 
   const tagFilterParsed = parseTagFilter(tagFilter);
   const isAllProjects = projectId.trim().toLowerCase() === 'all';
   const idList = projectIds.split(',').map((s) => s.trim()).filter(Boolean);
+
+  useEffect(() => {
+    if (viewMode !== 'timeline' || !timelineRef.current) return;
+    const measure = () => {
+      if (timelineRef.current) setTimelineHeight(timelineRef.current.clientHeight || 0);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(timelineRef.current);
+    return () => ro.disconnect();
+  }, [viewMode]);
 
   const fetchTasks = async () => {
     if (!pluginFetch) return;
@@ -316,12 +329,12 @@ export default function TickTickList({ config = {}, style = {} }) {
     );
   };
 
-  // Timeline (unchanged from previous)
+  // Timeline — hoursVisible exactly fills the available height
   const hoursVisible = timelineHoursVisible;
   const nowMin = getMinutesSinceMidnight(now);
   const totalMin = hoursVisible * 60;
-  const pxPerMin = 1.8;
-  const totalHeight = totalMin * pxPerMin;
+  const pxPerMin = timelineHeight > 0 ? timelineHeight / totalMin : 1.8;
+  const totalHeight = timelineHeight || totalMin * pxPerMin;
   const nowTop = totalHeight / 6;
   const windowStartMin = nowMin - nowTop / pxPerMin;
 
@@ -391,12 +404,14 @@ export default function TickTickList({ config = {}, style = {} }) {
             </div>
           )}
           <div
+            ref={timelineRef}
             style={{
               flex: 1,
               overflow: 'hidden',
               position: 'relative',
               background: 'rgba(0,0,0,0.15)',
               borderRadius: 6,
+              minHeight: 0,
             }}
           >
             <div
@@ -405,7 +420,7 @@ export default function TickTickList({ config = {}, style = {} }) {
                 top: 0,
                 left: 0,
                 right: 0,
-                height: totalHeight,
+                height: '100%',
               }}
             >
               {(() => {
