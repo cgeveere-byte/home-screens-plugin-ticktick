@@ -1,0 +1,112 @@
+{
+  "id": "ticktick",
+  "name": "TickTick",
+  "version": "0.1.6",
+  "description": "Show a TickTick list or project with empty checkboxes. Place multiple instances for different lists.",
+  "author": "You",
+  "license": "MIT",
+  "minAppVersion": "0.18.0",
+  "moduleType": "ticktick-list",
+  "category": "Personal",
+  "icon": "list-checks",
+  "defaultConfig": {
+    "projectId": "",
+    "title": "Tasks",
+    "maxItems": 30,
+    "showDue": true,
+    "showCompleted": false,
+    "viewMode": "list",
+    "tagFilter": "",
+    "showPriority": true,
+    "showTimes": false,
+    "timelineHoursVisible": 8,
+    "projectIds": "",
+    "projectColors": ""
+  },
+  "defaultSize": { "w": 360, "h": 420 },
+  "exports": {
+    "component": "default"
+  },
+  "secrets": [
+    {
+      "key": "api_token",
+      "label": "TickTick API Token",
+      "description": "From TickTick web: Avatar → Settings → Account → API Token",
+      "required": true,
+      "placeholder": "tp_..."
+    }
+  ],
+  "allowedDomains": ["api.ticktick.com"],
+  "permissions": ["network"],
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "title": {
+        "type": "string",
+        "title": "Header title",
+        "default": "Tasks"
+      },
+      "viewMode": {
+        "type": "string",
+        "title": "View",
+        "enum": ["list", "kanban", "agenda", "timeline"],
+        "default": "list"
+      },
+      "projectId": {
+        "type": "string",
+        "title": "Project ID",
+        "description": "Paste the project ID (from the URL or API). Use \"All\" with care."
+      },
+      "projectIds": {
+        "type": "string",
+        "title": "Project IDs (comma-separated)",
+        "description": "For timeline multi-list. Leave empty to use single Project ID."
+      },
+      "projectColors": {
+        "type": "string",
+        "title": "Project colors (comma-separated hex)",
+        "description": "Optional. One color per project ID, e.g. #60a5fa,#f59e0b,#ef4444",
+        "default": ""
+      },
+      "tagFilter": {
+        "type": "string",
+        "title": "Tag filter",
+        "description": "Comma-separated. OR by default. Use + or & for AND, - or ! for NOT. Example: work, urgent+today, -done"
+      },
+      "maxItems": {
+        "type": "integer",
+        "title": "Max tasks to show",
+        "default": 30,
+        "minimum": 1,
+        "maximum": 100
+      },
+      "showDue": {
+        "type": "boolean",
+        "title": "Show due dates",
+        "default": true
+      },
+      "showCompleted": {
+        "type": "boolean",
+        "title": "Include completed",
+        "default": false
+      },
+      "showPriority": {
+        "type": "boolean",
+        "title": "Color checkboxes by priority",
+        "default": true
+      },
+      "showTimes": {
+        "type": "boolean",
+        "title": "Show start/end times in agenda",
+        "default": false
+      },
+      "timelineHoursVisible": {
+        "type": "integer",
+        "title": "Hours visible on timeline",
+        "default": 8,
+        "minimum": 4,
+        "maximum": 16
+      }
+    }
+  }
+}
