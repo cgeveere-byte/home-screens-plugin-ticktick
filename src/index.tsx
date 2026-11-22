@@ -87,6 +87,16 @@ function getMinutesSinceMidnight(d) {
   return d.getHours() * 60 + d.getMinutes();
 }
 
+function isOverdue(task) {
+  const due = task.dueDate || task.startDate;
+  if (!due) return false;
+  try {
+    return new Date(due).getTime() < Date.now();
+  } catch {
+    return false;
+  }
+}
+
 export default function TickTickList({ config = {}, style = {} }) {
   const {
     projectId = '',
@@ -94,6 +104,7 @@ export default function TickTickList({ config = {}, style = {} }) {
     maxItems = 30,
     showDue = true,
     showCompleted = false,
+    hideOverdue = false,
     viewMode = 'list',
     tagFilter = '',
     showPriority = true,
@@ -198,6 +209,10 @@ export default function TickTickList({ config = {}, style = {} }) {
         allTasks = allTasks.filter((t) => taskMatchesFilter(t, tagFilterParsed));
       }
 
+      if (hideOverdue && viewMode === 'list') {
+        allTasks = allTasks.filter((t) => !isOverdue(t));
+      }
+
       allTasks.sort((a, b) => {
         const da = a.dueDate || a.startDate || '';
         const db = b.dueDate || b.startDate || '';
@@ -222,7 +237,7 @@ export default function TickTickList({ config = {}, style = {} }) {
     fetchTasks();
     const interval = setInterval(fetchTasks, 60000);
     return () => clearInterval(interval);
-  }, [projectId, maxItems, showCompleted, tagFilter, projectIds, viewMode]);
+  }, [projectId, maxItems, showCompleted, hideOverdue, tagFilter, projectIds, viewMode]);
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 30000);
@@ -301,7 +316,7 @@ export default function TickTickList({ config = {}, style = {} }) {
     );
   };
 
-  // Timeline
+  // Timeline (unchanged from previous)
   const hoursVisible = timelineHoursVisible;
   const nowMin = getMinutesSinceMidnight(now);
   const totalMin = hoursVisible * 60;
