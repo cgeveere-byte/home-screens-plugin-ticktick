@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { hostFrameStyle } from './host-style';
 
 const { pluginFetch } = window.__HS_SDK__ || {};
-const VERSION = '1.0.0';
+const VERSION = '1.0.1';
 
 function formatDate(iso) {
   if (!iso) return null;
@@ -373,18 +374,12 @@ export default function TickTickList({ config = {}, style = {} }) {
   return (
     <div
       style={{
-        width: '100%',
-        height: '100%',
+        ...hostFrameStyle(style),
         padding: '12px 14px',
-        boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
         gap: 8,
-        overflow: 'hidden',
-        color: 'inherit',
-        fontFamily: 'inherit',
         position: 'relative',
-        ...style,
       }}
     >
       <div style={{ fontWeight: 600, fontSize: '1.1em', opacity: 0.95 }}>{header}</div>
