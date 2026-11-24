@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { hostFrameStyle } from './host-style';
 
 const { pluginFetch } = window.__HS_SDK__ || {};
-const VERSION = '1.0.11';
+const VERSION = '1.0.12';
 
 function formatDate(iso) {
   if (!iso) return null;
@@ -665,7 +665,8 @@ export default function TickTickList({ config = {}, style = {} }) {
                       color: completed ? '#9ca3af' : undefined,
                       display: 'flex',
                       flexDirection: 'column',
-                      justifyContent: 'center',
+                      justifyContent: 'flex-start',
+                      alignItems: 'stretch',
                       lineHeight: 1.2,
                     }}
                   >

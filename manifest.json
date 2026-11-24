@@ -1,7 +1,7 @@
 {
   "id": "ticktick",
   "name": "TickTick",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Show a TickTick list or project with empty checkboxes. Place multiple instances for different lists.",
   "author": "You",
   "license": "MIT",
