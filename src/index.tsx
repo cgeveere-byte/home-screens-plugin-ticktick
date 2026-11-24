@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { hostFrameStyle } from './host-style';
 
 const { pluginFetch } = window.__HS_SDK__ || {};
-const VERSION = '1.0.4';
+const VERSION = '1.0.5';
 
 function formatDate(iso) {
   if (!iso) return null;
@@ -510,8 +510,9 @@ export default function TickTickList({ config = {}, style = {} }) {
                 const end = t.dueDate ? new Date(t.dueDate) : new Date(start.getTime() + 45 * 60000);
                 const sMin = (start - windowStart) / 60000;
                 const eMin = (end - windowStart) / 60000;
-                const top = sMin * pxPerMin;
-                const height = Math.max(22, (eMin - sMin) * pxPerMin);
+                const top = sMin * pxPerMin + 1;
+                const rawHeight = (eMin - sMin) * pxPerMin;
+                const height = Math.max(20, rawHeight - 3);
                 const prio = t.priority || 0;
                 const priorityCol = priorityColor(prio);
                 const projectColor = projectColorMap[t.projectId] || '#60a5fa';
@@ -526,13 +527,16 @@ export default function TickTickList({ config = {}, style = {} }) {
                       left: timelineGutter,
                       right: 8,
                       height,
-                      background: `${color}33`,
+                      background: `${color}40`,
                       borderLeft: `3px solid ${color}`,
+                      border: `1px solid ${color}55`,
+                      borderLeftWidth: 3,
                       borderRadius: 4,
                       padding: '2px 6px',
                       fontSize: '0.8em',
                       overflow: 'hidden',
                       boxSizing: 'border-box',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
                     }}
                   >
                     <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
