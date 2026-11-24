@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { hostFrameStyle } from './host-style';
 
 const { pluginFetch } = window.__HS_SDK__ || {};
-const VERSION = '1.0.9';
+const VERSION = '1.0.10';
 
 function formatDate(iso) {
   if (!iso) return null;
@@ -638,7 +638,8 @@ export default function TickTickList({ config = {}, style = {} }) {
                 const completed = isCompleted(t);
                 const titleText = t.title || '(untitled)';
                 const timeStr = `${formatTimeOnly(t.startDate)}${t.dueDate && t.dueDate !== t.startDate ? `–${formatTimeOnly(t.dueDate)}` : ''}`;
-                const singleLine = height < 36 && titleText.length <= 24;
+                const durationMin = Math.max(0, eMin - sMin);
+                const singleLine = titleText.length <= 28 && (height < 52 || durationMin <= 30);
 
                 return (
                   <div
@@ -663,8 +664,11 @@ export default function TickTickList({ config = {}, style = {} }) {
                       color: completed ? '#9ca3af' : undefined,
                       display: 'flex',
                       flexDirection: singleLine ? 'row' : 'column',
+                      flexWrap: 'nowrap',
                       alignItems: singleLine ? 'center' : 'stretch',
-                      gap: singleLine ? 6 : 0,
+                      justifyContent: singleLine ? 'flex-start' : undefined,
+                      gap: singleLine ? 8 : 0,
+                      lineHeight: 1.2,
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0, flex: singleLine ? '1 1 auto' : undefined }}>
