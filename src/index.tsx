@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { hostFrameStyle } from './host-style';
 
 const { pluginFetch } = window.__HS_SDK__ || {};
-const VERSION = '1.0.1';
+const VERSION = '1.0.2';
 
 function formatDate(iso) {
   if (!iso) return null;
@@ -107,6 +107,7 @@ export default function TickTickList({ config = {}, style = {} }) {
     showDue = true,
     showCompleted = false,
     hideOverdue = false,
+    greyOutOverdueAgenda = false,
     viewMode = 'list',
     tagFilter = '',
     showPriority = true,
@@ -297,6 +298,8 @@ export default function TickTickList({ config = {}, style = {} }) {
       timeLabel = startTime;
     }
 
+    const overdue = viewMode === 'agenda' && greyOutOverdueAgenda && isOverdue(t);
+
     return (
       <div
         key={t.id}
@@ -307,6 +310,8 @@ export default function TickTickList({ config = {}, style = {} }) {
           fontSize: '0.9em',
           lineHeight: 1.3,
           padding: '4px 0',
+          opacity: overdue ? 0.45 : 1,
+          color: overdue ? '#9ca3af' : undefined,
         }}
       >
         <span
@@ -315,14 +320,14 @@ export default function TickTickList({ config = {}, style = {} }) {
             height: 15,
             border: `1.5px solid ${boxColor === 'transparent' ? 'currentColor' : boxColor}`,
             borderRadius: 3,
-            opacity: 0.85,
+            opacity: overdue ? 0.5 : 0.85,
             flexShrink: 0,
             background: boxColor === 'transparent' ? 'transparent' : `${boxColor}22`,
           }}
         />
         <span style={{ flex: 1 }}>{t.title || '(untitled)'}</span>
         {timeLabel && (
-          <span style={{ opacity: 0.65, fontSize: '0.8em', whiteSpace: 'nowrap' }}>{timeLabel}</span>
+          <span style={{ opacity: overdue ? 0.4 : 0.65, fontSize: '0.8em', whiteSpace: 'nowrap' }}>{timeLabel}</span>
         )}
         {due && viewMode !== 'agenda' && (
           <span style={{ opacity: 0.55, fontSize: '0.8em', whiteSpace: 'nowrap' }}>{due}</span>
