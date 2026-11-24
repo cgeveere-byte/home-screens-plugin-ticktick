@@ -1,7 +1,7 @@
 {
   "id": "ticktick",
   "name": "TickTick",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Show a TickTick list or project with empty checkboxes. Place multiple instances for different lists.",
   "author": "You",
   "license": "MIT",
@@ -23,7 +23,10 @@
     "showTimes": false,
     "timelineHoursVisible": 8,
     "projectIds": "",
-    "projectColors": ""
+    "projectColors": "",
+    "showQrCode": false,
+    "qrSize": 72,
+    "titleFontSize": 0
   },
   "defaultSize": { "w": 360, "h": 420 },
   "exports": {
@@ -38,7 +41,7 @@
       "placeholder": "tp_..."
     }
   ],
-  "allowedDomains": ["api.ticktick.com"],
+  "allowedDomains": ["api.ticktick.com", "api.qrserver.com"],
   "permissions": ["network"],
   "configSchema": {
     "type": "object",
@@ -47,6 +50,14 @@
         "type": "string",
         "title": "Header title",
         "default": "Tasks"
+      },
+      "titleFontSize": {
+        "type": "integer",
+        "title": "Title font size (px, 0 = relative)",
+        "description": "Fixed pixel size for the title. 0 keeps it relative to the Style font size. Content always follows Style > Font Size.",
+        "default": 0,
+        "minimum": 0,
+        "maximum": 48
       },
       "viewMode": {
         "type": "string",
@@ -120,6 +131,19 @@
         "default": 8,
         "minimum": 4,
         "maximum": 16
+      },
+      "showQrCode": {
+        "type": "boolean",
+        "title": "Show QR code",
+        "description": "Show a QR that opens the list in TickTick (single project) or a search (tag filter). Not available for multi-list timelines.",
+        "default": false
+      },
+      "qrSize": {
+        "type": "integer",
+        "title": "QR code size (px)",
+        "default": 72,
+        "minimum": 48,
+        "maximum": 160
       }
     }
   }
