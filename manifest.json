@@ -1,7 +1,7 @@
 {
   "id": "ticktick",
   "name": "TickTick",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Show a TickTick list or project with empty checkboxes. Place multiple instances for different lists.",
   "author": "You",
   "license": "MIT",
@@ -30,7 +30,8 @@
     "hourLabelFontSize": 11,
     "currentTimeBadgeFontSize": 10,
     "timelineGutterWidth": 0,
-    "useRotatingPalette": false
+    "useRotatingPalette": false,
+    "showTimelineCheckboxes": false
   },
   "defaultSize": {
     "w": 360,
@@ -190,6 +191,12 @@
         "type": "boolean",
         "title": "Rotating color palette for task backgrounds",
         "description": "Color task backgrounds with a rotating 7-color palette (blue, teal, yellow, gray, peach, light blue, orange). Left bar still shows priority. Cycles after the 7th task.",
+        "default": false
+      },
+      "showTimelineCheckboxes": {
+        "type": "boolean",
+        "title": "Show checkboxes on timeline",
+        "description": "Show a checkbox on timeline events. Completed events stay visible, greyed out, and checked. If this is off, completed events are still greyed out but not removed.",
         "default": false
       }
     }

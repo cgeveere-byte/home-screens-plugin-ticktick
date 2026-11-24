@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { hostFrameStyle } from './host-style';
 
 const { pluginFetch } = window.__HS_SDK__ || {};
-const VERSION = '1.0.6';
+const VERSION = '1.0.7';
 
 function formatDate(iso) {
   if (!iso) return null;
@@ -167,6 +167,7 @@ export default function TickTickList({ config = {}, style = {} }) {
     currentTimeBadgeFontSize = 10,
     timelineGutterWidth = 0,
     useRotatingPalette = false,
+    showTimelineCheckboxes = false,
   } = config;
 
   const [tasks, setTasks] = useState([]);
@@ -219,7 +220,7 @@ export default function TickTickList({ config = {}, style = {} }) {
 
       if (viewMode === 'timeline' && idList.length > 0) {
         const body = {
-          status: showCompleted ? [0, 2] : [0],
+          status: [0, 2],
           projectIds: idList,
         };
         const res = await pluginFetch('ticktick', {
@@ -274,7 +275,7 @@ export default function TickTickList({ config = {}, style = {} }) {
         name = data.project?.name || '';
       }
 
-      if (!showCompleted) {
+      if (!showCompleted && viewMode !== 'timeline') {
         allTasks = allTasks.filter((t) => t.status !== 2 && !t.completedTime);
       }
 
@@ -360,7 +361,9 @@ export default function TickTickList({ config = {}, style = {} }) {
       : null;
 
     const overdue = viewMode === 'agenda' && greyOutOverdueAgenda && isOverdue(t);
+    const completed = t.status === 2 || !!t.completedTime;
     const paletteColor = useRotatingPalette ? ROTATING_PALETTE[index % ROTATING_PALETTE.length] : null;
+    const greyTimeline = viewMode === 'timeline' && completed;
 
     return (
       <div
@@ -372,24 +375,43 @@ export default function TickTickList({ config = {}, style = {} }) {
           fontSize: '0.9em',
           lineHeight: 1.3,
           padding: '4px 6px',
-          opacity: overdue ? 0.45 : 1,
-          color: overdue ? '#9ca3af' : undefined,
+          opacity: overdue || greyTimeline ? 0.45 : 1,
+          color: overdue || greyTimeline ? '#9ca3af' : undefined,
           background: paletteColor ? `${paletteColor}22` : undefined,
           borderRadius: paletteColor ? 4 : undefined,
           borderLeft: paletteColor ? `3px solid ${boxColor === 'transparent' ? paletteColor : boxColor}` : undefined,
         }}
       >
-        <span
-          style={{
-            width: 15,
-            height: 15,
-            border: `1.5px solid ${boxColor === 'transparent' ? 'currentColor' : boxColor}`,
-            borderRadius: 3,
-            opacity: overdue ? 0.5 : 0.85,
-            flexShrink: 0,
-            background: boxColor === 'transparent' ? 'transparent' : `${boxColor}22`,
-          }}
-        />
+        {viewMode === 'timeline' && showTimelineCheckboxes ? (
+          <span
+            style={{
+              width: 14,
+              height: 14,
+              border: '1.5px solid currentColor',
+              borderRadius: 3,
+              flexShrink: 0,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 10,
+              opacity: 0.8,
+            }}
+          >
+            {completed ? '✓' : ''}
+          </span>
+        ) : (
+          <span
+            style={{
+              width: 15,
+              height: 15,
+              border: `1.5px solid ${boxColor === 'transparent' ? 'currentColor' : boxColor}`,
+              borderRadius: 3,
+              opacity: overdue ? 0.5 : 0.85,
+              flexShrink: 0,
+              background: boxColor === 'transparent' ? 'transparent' : `${boxColor}22`,
+            }}
+          />
+        )}
         <span style={{ flex: 1 }}>{t.title || '(untitled)'}</span>
         {countdown && (
           <span style={{ opacity: overdue ? 0.4 : 0.75, fontSize: '0.8em', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{countdown}</span>
@@ -569,6 +591,7 @@ export default function TickTickList({ config = {}, style = {} }) {
                   : null;
                 const bgColor = paletteColor || (priorityCol !== 'transparent' ? priorityCol : projectColor);
                 const leftBarColor = priorityCol !== 'transparent' ? priorityCol : (paletteColor || projectColor);
+                const completed = t.status === 2 || !!t.completedTime;
 
                 return (
                   <div
@@ -579,9 +602,9 @@ export default function TickTickList({ config = {}, style = {} }) {
                       left: timelineGutter,
                       right: 8,
                       height,
-                      background: `${bgColor}40`,
-                      borderLeft: `3px solid ${leftBarColor}`,
-                      border: `1px solid ${bgColor}55`,
+                      background: completed ? 'rgba(156,163,175,0.18)' : `${bgColor}40`,
+                      borderLeft: `3px solid ${completed ? '#6b7280' : leftBarColor}`,
+                      border: completed ? '1px solid rgba(156,163,175,0.35)' : `1px solid ${bgColor}55`,
                       borderLeftWidth: 3,
                       borderRadius: 4,
                       padding: '2px 6px',
@@ -589,10 +612,32 @@ export default function TickTickList({ config = {}, style = {} }) {
                       overflow: 'hidden',
                       boxSizing: 'border-box',
                       boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
+                      opacity: completed ? 0.55 : 1,
+                      color: completed ? '#9ca3af' : undefined,
                     }}
                   >
-                    <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {t.title || '(untitled)'}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      {showTimelineCheckboxes && (
+                        <span
+                          style={{
+                            width: 12,
+                            height: 12,
+                            border: '1.5px solid currentColor',
+                            borderRadius: 2,
+                            flexShrink: 0,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: 9,
+                            lineHeight: 1,
+                          }}
+                        >
+                          {completed ? '✓' : ''}
+                        </span>
+                      )}
+                      <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textDecoration: completed ? 'line-through' : undefined }}>
+                        {t.title || '(untitled)'}
+                      </div>
                     </div>
                     <div style={{ opacity: 0.7, fontSize: '0.85em' }}>
                       {formatTimeOnly(t.startDate)}
