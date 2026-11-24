@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { hostFrameStyle } from './host-style';
 
 const { pluginFetch } = window.__HS_SDK__ || {};
-const VERSION = '1.0.2';
+const VERSION = '1.0.3';
 
 function formatDate(iso) {
   if (!iso) return null;
@@ -99,6 +99,16 @@ function isOverdue(task) {
   }
 }
 
+function buildQrUrl(projectId, tagFilter, idList) {
+  if (projectId && projectId.trim().toLowerCase() !== 'all' && idList.length === 0) {
+    return `https://ticktick.com/#p/${encodeURIComponent(projectId.trim())}/tasks`;
+  }
+  if (tagFilter && tagFilter.trim()) {
+    return `https://ticktick.com/#q/${encodeURIComponent(tagFilter.trim())}`;
+  }
+  return null;
+}
+
 export default function TickTickList({ config = {}, style = {} }) {
   const {
     projectId = '',
@@ -115,6 +125,9 @@ export default function TickTickList({ config = {}, style = {} }) {
     timelineHoursVisible = 8,
     projectIds = '',
     projectColors = '',
+    showQrCode = false,
+    qrSize = 72,
+    titleFontSize = 0,
   } = config;
 
   const [tasks, setTasks] = useState([]);
@@ -130,6 +143,11 @@ export default function TickTickList({ config = {}, style = {} }) {
   const tagFilterParsed = parseTagFilter(tagFilter);
   const isAllProjects = projectId.trim().toLowerCase() === 'all';
   const idList = projectIds.split(',').map((s) => s.trim()).filter(Boolean);
+
+  const qrTarget = showQrCode ? buildQrUrl(projectId, tagFilter, idList) : null;
+  const qrImageSrc = qrTarget
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=${Math.max(48, Math.min(160, qrSize))}x${Math.max(48, Math.min(160, qrSize))}&margin=4&data=${encodeURIComponent(qrTarget)}`
+    : null;
 
   useEffect(() => {
     if (viewMode !== 'timeline' || !timelineRef.current) return;
@@ -336,7 +354,9 @@ export default function TickTickList({ config = {}, style = {} }) {
     );
   };
 
-  // Timeline — hoursVisible exactly fills the available height
+  const baseFont = (style && style.fontSize) || 16;
+  const timelineGutter = Math.max(64, Math.round(baseFont * 3.6));
+
   const hoursVisible = timelineHoursVisible;
   const nowMin = getMinutesSinceMidnight(now);
   const totalMin = hoursVisible * 60;
@@ -376,6 +396,10 @@ export default function TickTickList({ config = {}, style = {} }) {
     projectColorMap[id] = colorList[i] || defaultPalette[i % defaultPalette.length];
   });
 
+  const titleStyle = titleFontSize > 0
+    ? { fontWeight: 600, fontSize: `${titleFontSize}px`, opacity: 0.95, lineHeight: 1.2 }
+    : { fontWeight: 600, fontSize: '1.15em', opacity: 0.95 };
+
   return (
     <div
       style={{
@@ -387,7 +411,23 @@ export default function TickTickList({ config = {}, style = {} }) {
         position: 'relative',
       }}
     >
-      <div style={{ fontWeight: 600, fontSize: '1.1em', opacity: 0.95 }}>{header}</div>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+        <div style={titleStyle}>{header}</div>
+        {qrImageSrc && (
+          <img
+            src={qrImageSrc}
+            alt="TickTick link"
+            style={{
+              width: Math.max(48, Math.min(160, qrSize)),
+              height: Math.max(48, Math.min(160, qrSize)),
+              borderRadius: 4,
+              flexShrink: 0,
+              background: '#fff',
+              padding: 2,
+            }}
+          />
+        )}
+      </div>
 
       {!projectId && !tagFilter && idList.length === 0 && (
         <div style={{ opacity: 0.7, fontSize: '0.9em' }}>Set a Project ID or Tag filter.</div>
@@ -440,19 +480,20 @@ export default function TickTickList({ config = {}, style = {} }) {
                         position: 'absolute',
                         top,
                         left: 0,
-                        right: 0,
+                        width: timelineGutter - 4,
                         borderTop: isMidnight
                           ? '2px solid rgba(255,255,255,0.25)'
                           : '1px solid rgba(255,255,255,0.08)',
-                        paddingLeft: 6,
-                        fontSize: '0.7em',
-                        opacity: 0.45,
+                        paddingLeft: 4,
+                        fontSize: '11px',
+                        opacity: 0.5,
                         pointerEvents: 'none',
                         lineHeight: 1,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
                       }}
                     >
                       {String(hour).padStart(2, '0')}:00
-                      {isMidnight ? ' (midnight)' : ''}
                     </div>
                   );
                 }
@@ -477,7 +518,7 @@ export default function TickTickList({ config = {}, style = {} }) {
                     style={{
                       position: 'absolute',
                       top,
-                      left: 52,
+                      left: timelineGutter,
                       right: 8,
                       height,
                       background: `${color}33`,
@@ -515,14 +556,15 @@ export default function TickTickList({ config = {}, style = {} }) {
                 <div
                   style={{
                     position: 'absolute',
-                    left: 4,
-                    top: -7,
+                    left: 2,
+                    top: -8,
                     background: '#ef4444',
                     color: 'white',
-                    fontSize: '0.65em',
-                    padding: '0 4px',
+                    fontSize: '10px',
+                    padding: '1px 4px',
                     borderRadius: 3,
                     fontWeight: 600,
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {formatTime(now)}
@@ -597,7 +639,7 @@ export default function TickTickList({ config = {}, style = {} }) {
       )}
 
       {lastSynced && (
-        <div style={{ fontSize: '0.7em', opacity: 0.45, textAlign: 'right', marginTop: 4 }}>
+        <div style={{ fontSize: '10px', opacity: 0.45, textAlign: 'right', marginTop: 4 }}>
           Synced {formatTime(lastSynced)}
         </div>
       )}
@@ -607,7 +649,7 @@ export default function TickTickList({ config = {}, style = {} }) {
           position: 'absolute',
           bottom: 4,
           left: 8,
-          fontSize: '0.65em',
+          fontSize: '10px',
           opacity: 0.35,
           pointerEvents: 'none',
           userSelect: 'none',
