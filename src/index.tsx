@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { hostFrameStyle } from './host-style';
 
 const { pluginFetch } = window.__HS_SDK__ || {};
-const VERSION = '1.0.10';
+const VERSION = '1.0.11';
 
 function formatDate(iso) {
   if (!iso) return null;
@@ -638,8 +638,9 @@ export default function TickTickList({ config = {}, style = {} }) {
                 const completed = isCompleted(t);
                 const titleText = t.title || '(untitled)';
                 const timeStr = `${formatTimeOnly(t.startDate)}${t.dueDate && t.dueDate !== t.startDate ? `–${formatTimeOnly(t.dueDate)}` : ''}`;
-                const durationMin = Math.max(0, eMin - sMin);
-                const singleLine = titleText.length <= 28 && (height < 52 || durationMin <= 30);
+                const shortBlock = height < 44;
+                const longTitle = titleText.length > 22;
+                const timeOnSameLine = shortBlock || !longTitle;
 
                 return (
                   <div
@@ -663,15 +664,12 @@ export default function TickTickList({ config = {}, style = {} }) {
                       opacity: completed ? 0.55 : 1,
                       color: completed ? '#9ca3af' : undefined,
                       display: 'flex',
-                      flexDirection: singleLine ? 'row' : 'column',
-                      flexWrap: 'nowrap',
-                      alignItems: singleLine ? 'center' : 'stretch',
-                      justifyContent: singleLine ? 'flex-start' : undefined,
-                      gap: singleLine ? 8 : 0,
+                      flexDirection: 'column',
+                      justifyContent: 'center',
                       lineHeight: 1.2,
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0, flex: singleLine ? '1 1 auto' : undefined }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
                       {showTimelineCheckboxes && (
                         <span
                           style={{
@@ -690,13 +688,20 @@ export default function TickTickList({ config = {}, style = {} }) {
                           {completed ? '✓' : ''}
                         </span>
                       )}
-                      <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textDecoration: completed ? 'line-through' : undefined, minWidth: 0 }}>
+                      <div style={{ flex: 1, minWidth: 0, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textDecoration: completed ? 'line-through' : undefined }}>
                         {titleText}
                       </div>
+                      {timeOnSameLine && (
+                        <div style={{ marginLeft: 'auto', opacity: 0.75, fontSize: '0.85em', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                          {timeStr}
+                        </div>
+                      )}
                     </div>
-                    <div style={{ opacity: 0.7, fontSize: '0.85em', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                      {timeStr}
-                    </div>
+                    {!timeOnSameLine && (
+                      <div style={{ alignSelf: 'flex-end', opacity: 0.75, fontSize: '0.85em', whiteSpace: 'nowrap', marginTop: 1 }}>
+                        {timeStr}
+                      </div>
+                    )}
                   </div>
                 );
               })}
