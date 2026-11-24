@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { hostFrameStyle } from './host-style';
 
 const { pluginFetch } = window.__HS_SDK__ || {};
-const VERSION = '1.0.8';
+const VERSION = '1.0.9';
 
 function formatDate(iso) {
   if (!iso) return null;
@@ -132,6 +132,13 @@ function isOverdue(task) {
   } catch {
     return false;
   }
+}
+
+function isCompleted(task) {
+  // TickTick keeps completedTime even after a task is unchecked.
+  // Only status 2 (or 1) means currently completed.
+  const s = Number(task && task.status);
+  return s === 2 || s === 1;
 }
 
 function buildQrUrl(projectId, tagFilter, idList) {
@@ -275,8 +282,45 @@ export default function TickTickList({ config = {}, style = {} }) {
         name = data.project?.name || '';
       }
 
+      if (viewMode === 'timeline') {
+        try {
+          const nowIso = new Date();
+          const start = new Date(nowIso.getTime() - 24 * 3600000);
+          const end = new Date(nowIso.getTime() + 48 * 3600000);
+          const projIds = idList.length > 0
+            ? idList
+            : (projectId && !isAllProjects ? [projectId] : []);
+          if (projIds.length > 0) {
+            const cRes = await pluginFetch('ticktick', {
+              url: 'https://api.ticktick.com/open/v1/task/completed',
+              method: 'POST',
+              payload: JSON.stringify({
+                projectIds: projIds,
+                startDate: start.toISOString(),
+                endDate: end.toISOString(),
+              }),
+              headers: { 'Content-Type': 'application/json' },
+              secretInjections: { header: { Authorization: 'Bearer {{api_token}}' } },
+              cacheTtlMs: 30000,
+            });
+            if (cRes.ok) {
+              const completedTasks = await cRes.json();
+              const seen = new Set(allTasks.map((t) => t.id));
+              (Array.isArray(completedTasks) ? completedTasks : []).forEach((ct) => {
+                if (ct && ct.id && !seen.has(ct.id)) {
+                  allTasks.push(ct);
+                  seen.add(ct.id);
+                }
+              });
+            }
+          }
+        } catch {
+          // completed fetch is best-effort
+        }
+      }
+
       if (!showCompleted && viewMode !== 'timeline') {
-        allTasks = allTasks.filter((t) => t.status !== 2 && !t.completedTime);
+        allTasks = allTasks.filter((t) => !isCompleted(t));
       }
 
       if (tagFilter && (tagFilterParsed.and.length > 0 || tagFilterParsed.not.length > 0)) {
@@ -361,7 +405,7 @@ export default function TickTickList({ config = {}, style = {} }) {
       : null;
 
     const overdue = viewMode === 'agenda' && greyOutOverdueAgenda && isOverdue(t);
-    const completed = t.status === 2 || !!t.completedTime;
+    const completed = isCompleted(t);
     const paletteColor = useRotatingPalette ? ROTATING_PALETTE[index % ROTATING_PALETTE.length] : null;
     const greyTimeline = viewMode === 'timeline' && completed;
 
@@ -591,7 +635,7 @@ export default function TickTickList({ config = {}, style = {} }) {
                   : null;
                 const bgColor = paletteColor || (priorityCol !== 'transparent' ? priorityCol : projectColor);
                 const leftBarColor = priorityCol !== 'transparent' ? priorityCol : (paletteColor || projectColor);
-                const completed = t.status === 2 || !!t.completedTime;
+                const completed = isCompleted(t);
                 const titleText = t.title || '(untitled)';
                 const timeStr = `${formatTimeOnly(t.startDate)}${t.dueDate && t.dueDate !== t.startDate ? `–${formatTimeOnly(t.dueDate)}` : ''}`;
                 const singleLine = height < 36 && titleText.length <= 24;
