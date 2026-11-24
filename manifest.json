@@ -1,7 +1,7 @@
 {
   "id": "ticktick",
   "name": "TickTick",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Show a TickTick list or project with empty checkboxes. Place multiple instances for different lists.",
   "author": "You",
   "license": "MIT",
@@ -16,6 +16,7 @@
     "showDue": true,
     "showCompleted": false,
     "hideOverdue": false,
+    "greyOutOverdueAgenda": false,
     "viewMode": "list",
     "tagFilter": "",
     "showPriority": true,
@@ -95,6 +96,12 @@
         "type": "boolean",
         "title": "Hide overdue (list view)",
         "description": "Hide tasks whose due date is in the past, whether completed or not",
+        "default": false
+      },
+      "greyOutOverdueAgenda": {
+        "type": "boolean",
+        "title": "Grey out overdue (agenda view)",
+        "description": "In agenda view, grey out tasks past their due date. Completed tasks still disappear.",
         "default": false
       },
       "showPriority": {
