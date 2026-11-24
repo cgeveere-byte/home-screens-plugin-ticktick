@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { hostFrameStyle } from './host-style';
 
 const { pluginFetch } = window.__HS_SDK__ || {};
-const VERSION = '1.0.3';
+const VERSION = '1.0.4';
 
 function formatDate(iso) {
   if (!iso) return null;
@@ -128,6 +128,9 @@ export default function TickTickList({ config = {}, style = {} }) {
     showQrCode = false,
     qrSize = 72,
     titleFontSize = 0,
+    hourLabelFontSize = 11,
+    currentTimeBadgeFontSize = 10,
+    timelineGutterWidth = 0,
   } = config;
 
   const [tasks, setTasks] = useState([]);
@@ -355,7 +358,9 @@ export default function TickTickList({ config = {}, style = {} }) {
   };
 
   const baseFont = (style && style.fontSize) || 16;
-  const timelineGutter = Math.max(64, Math.round(baseFont * 3.6));
+  const timelineGutter = timelineGutterWidth > 0
+    ? Math.max(40, Math.min(200, timelineGutterWidth))
+    : Math.max(64, Math.round(baseFont * 3.6));
 
   const hoursVisible = timelineHoursVisible;
   const nowMin = getMinutesSinceMidnight(now);
@@ -485,7 +490,7 @@ export default function TickTickList({ config = {}, style = {} }) {
                           ? '2px solid rgba(255,255,255,0.25)'
                           : '1px solid rgba(255,255,255,0.08)',
                         paddingLeft: 4,
-                        fontSize: '11px',
+                        fontSize: `${Math.max(8, Math.min(24, hourLabelFontSize))}px`,
                         opacity: 0.5,
                         pointerEvents: 'none',
                         lineHeight: 1,
@@ -560,7 +565,7 @@ export default function TickTickList({ config = {}, style = {} }) {
                     top: -8,
                     background: '#ef4444',
                     color: 'white',
-                    fontSize: '10px',
+                    fontSize: `${Math.max(8, Math.min(20, currentTimeBadgeFontSize))}px`,
                     padding: '1px 4px',
                     borderRadius: 3,
                     fontWeight: 600,

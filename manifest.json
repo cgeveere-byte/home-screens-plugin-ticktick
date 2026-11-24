@@ -1,7 +1,7 @@
 {
   "id": "ticktick",
   "name": "TickTick",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Show a TickTick list or project with empty checkboxes. Place multiple instances for different lists.",
   "author": "You",
   "license": "MIT",
@@ -26,9 +26,15 @@
     "projectColors": "",
     "showQrCode": false,
     "qrSize": 72,
-    "titleFontSize": 0
+    "titleFontSize": 0,
+    "hourLabelFontSize": 11,
+    "currentTimeBadgeFontSize": 10,
+    "timelineGutterWidth": 0
   },
-  "defaultSize": { "w": 360, "h": 420 },
+  "defaultSize": {
+    "w": 360,
+    "h": 420
+  },
   "exports": {
     "component": "default"
   },
@@ -36,13 +42,18 @@
     {
       "key": "api_token",
       "label": "TickTick API Token",
-      "description": "From TickTick web: Avatar → Settings → Account → API Token",
+      "description": "From TickTick web: Avatar \u2192 Settings \u2192 Account \u2192 API Token",
       "required": true,
       "placeholder": "tp_..."
     }
   ],
-  "allowedDomains": ["api.ticktick.com", "api.qrserver.com"],
-  "permissions": ["network"],
+  "allowedDomains": [
+    "api.ticktick.com",
+    "api.qrserver.com"
+  ],
+  "permissions": [
+    "network"
+  ],
   "configSchema": {
     "type": "object",
     "properties": {
@@ -62,7 +73,12 @@
       "viewMode": {
         "type": "string",
         "title": "View",
-        "enum": ["list", "kanban", "agenda", "timeline"],
+        "enum": [
+          "list",
+          "kanban",
+          "agenda",
+          "timeline"
+        ],
         "default": "list"
       },
       "projectId": {
@@ -144,6 +160,30 @@
         "default": 72,
         "minimum": 48,
         "maximum": 160
+      },
+      "hourLabelFontSize": {
+        "type": "integer",
+        "title": "Hour label font size (px)",
+        "description": "Fixed pixel size for timeline hour labels. Independent of Style > Font Size.",
+        "default": 11,
+        "minimum": 8,
+        "maximum": 24
+      },
+      "currentTimeBadgeFontSize": {
+        "type": "integer",
+        "title": "Current-time badge font size (px)",
+        "description": "Fixed pixel size for the red current-time badge. Independent of Style > Font Size.",
+        "default": 10,
+        "minimum": 8,
+        "maximum": 20
+      },
+      "timelineGutterWidth": {
+        "type": "integer",
+        "title": "Timeline gutter width (px, 0 = auto)",
+        "description": "Width of the left time column. 0 keeps the automatic size that scales with Style font size. Positive value sets a fixed pixel width.",
+        "default": 0,
+        "minimum": 0,
+        "maximum": 200
       }
     }
   }
