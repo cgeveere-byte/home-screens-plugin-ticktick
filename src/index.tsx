@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { hostFrameStyle } from './host-style';
 
 const { pluginFetch } = window.__HS_SDK__ || {};
-const VERSION = '1.0.7';
+const VERSION = '1.0.8';
 
 function formatDate(iso) {
   if (!iso) return null;
@@ -592,6 +592,9 @@ export default function TickTickList({ config = {}, style = {} }) {
                 const bgColor = paletteColor || (priorityCol !== 'transparent' ? priorityCol : projectColor);
                 const leftBarColor = priorityCol !== 'transparent' ? priorityCol : (paletteColor || projectColor);
                 const completed = t.status === 2 || !!t.completedTime;
+                const titleText = t.title || '(untitled)';
+                const timeStr = `${formatTimeOnly(t.startDate)}${t.dueDate && t.dueDate !== t.startDate ? `–${formatTimeOnly(t.dueDate)}` : ''}`;
+                const singleLine = height < 36 && titleText.length <= 24;
 
                 return (
                   <div
@@ -614,9 +617,13 @@ export default function TickTickList({ config = {}, style = {} }) {
                       boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
                       opacity: completed ? 0.55 : 1,
                       color: completed ? '#9ca3af' : undefined,
+                      display: 'flex',
+                      flexDirection: singleLine ? 'row' : 'column',
+                      alignItems: singleLine ? 'center' : 'stretch',
+                      gap: singleLine ? 6 : 0,
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0, flex: singleLine ? '1 1 auto' : undefined }}>
                       {showTimelineCheckboxes && (
                         <span
                           style={{
@@ -635,13 +642,12 @@ export default function TickTickList({ config = {}, style = {} }) {
                           {completed ? '✓' : ''}
                         </span>
                       )}
-                      <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textDecoration: completed ? 'line-through' : undefined }}>
-                        {t.title || '(untitled)'}
+                      <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textDecoration: completed ? 'line-through' : undefined, minWidth: 0 }}>
+                        {titleText}
                       </div>
                     </div>
-                    <div style={{ opacity: 0.7, fontSize: '0.85em' }}>
-                      {formatTimeOnly(t.startDate)}
-                      {t.dueDate && t.dueDate !== t.startDate ? `–${formatTimeOnly(t.dueDate)}` : ''}
+                    <div style={{ opacity: 0.7, fontSize: '0.85em', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                      {timeStr}
                     </div>
                   </div>
                 );
