@@ -1,7 +1,7 @@
 {
   "id": "ticktick",
   "name": "TickTick",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Show a TickTick list or project with empty checkboxes. Place multiple instances for different lists.",
   "author": "You",
   "license": "MIT",
@@ -29,7 +29,8 @@
     "titleFontSize": 0,
     "hourLabelFontSize": 11,
     "currentTimeBadgeFontSize": 10,
-    "timelineGutterWidth": 0
+    "timelineGutterWidth": 0,
+    "useRotatingPalette": false
   },
   "defaultSize": {
     "w": 360,
@@ -184,6 +185,12 @@
         "default": 0,
         "minimum": 0,
         "maximum": 200
+      },
+      "useRotatingPalette": {
+        "type": "boolean",
+        "title": "Rotating color palette for task backgrounds",
+        "description": "Color task backgrounds with a rotating 7-color palette (blue, teal, yellow, gray, peach, light blue, orange). Left bar still shows priority. Cycles after the 7th task.",
+        "default": false
       }
     }
   }

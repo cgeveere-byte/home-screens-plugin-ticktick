@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { hostFrameStyle } from './host-style';
 
 const { pluginFetch } = window.__HS_SDK__ || {};
-const VERSION = '1.0.5';
+const VERSION = '1.0.6';
 
 function formatDate(iso) {
   if (!iso) return null;
@@ -30,6 +30,41 @@ function priorityColor(p) {
   if (p >= 1) return '#3b82f6';
   return 'transparent';
 }
+const ROTATING_PALETTE = [
+  '#60a5fa', // blue
+  '#2dd4bf', // teal
+  '#fde047', // yellow
+  '#9ca3af', // gray
+  '#fdba74', // peach
+  '#7dd3fc', // light blue
+  '#fb923c', // orange
+];
+
+function formatCountdown(iso, now) {
+  if (!iso || !now) return null;
+  try {
+    const target = new Date(iso);
+    const diffMs = target.getTime() - now.getTime();
+    if (diffMs <= 0) return null;
+
+    const diffMin = Math.max(0, Math.round(diffMs / 60000));
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    const sameDay = target.toDateString() === now.toDateString();
+
+    if (diffMin < 60) return `${diffMin}m`;
+    if (sameDay) return `${diffHours}h`;
+    if (diffMs < 24 * 3600000) {
+      const remHours = diffHours % 24;
+      return remHours > 0 ? `${diffDays}d ${remHours}h` : `${Math.max(1, diffDays)}d`;
+    }
+    return `${diffDays}d`;
+  } catch {
+    return null;
+  }
+}
+
 
 function getAgendaLabel(iso) {
   if (!iso) return 'No date';
@@ -131,6 +166,7 @@ export default function TickTickList({ config = {}, style = {} }) {
     hourLabelFontSize = 11,
     currentTimeBadgeFontSize = 10,
     timelineGutterWidth = 0,
+    useRotatingPalette = false,
   } = config;
 
   const [tasks, setTasks] = useState([]);
@@ -302,7 +338,7 @@ export default function TickTickList({ config = {}, style = {} }) {
     agendaGroups[key].push(t);
   });
 
-  const renderTask = (t) => {
+  const renderTask = (t, index = 0) => {
     const due = showDue ? formatDate(t.dueDate || t.startDate) : null;
     const prio = t.priority || 0;
     const boxColor = priorityColor(prio);
@@ -319,7 +355,12 @@ export default function TickTickList({ config = {}, style = {} }) {
       timeLabel = startTime;
     }
 
+    const countdown = viewMode === 'agenda'
+      ? formatCountdown(t.startDate || t.dueDate, now)
+      : null;
+
     const overdue = viewMode === 'agenda' && greyOutOverdueAgenda && isOverdue(t);
+    const paletteColor = useRotatingPalette ? ROTATING_PALETTE[index % ROTATING_PALETTE.length] : null;
 
     return (
       <div
@@ -330,9 +371,12 @@ export default function TickTickList({ config = {}, style = {} }) {
           gap: 8,
           fontSize: '0.9em',
           lineHeight: 1.3,
-          padding: '4px 0',
+          padding: '4px 6px',
           opacity: overdue ? 0.45 : 1,
           color: overdue ? '#9ca3af' : undefined,
+          background: paletteColor ? `${paletteColor}22` : undefined,
+          borderRadius: paletteColor ? 4 : undefined,
+          borderLeft: paletteColor ? `3px solid ${boxColor === 'transparent' ? paletteColor : boxColor}` : undefined,
         }}
       >
         <span
@@ -347,6 +391,9 @@ export default function TickTickList({ config = {}, style = {} }) {
           }}
         />
         <span style={{ flex: 1 }}>{t.title || '(untitled)'}</span>
+        {countdown && (
+          <span style={{ opacity: overdue ? 0.4 : 0.75, fontSize: '0.8em', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{countdown}</span>
+        )}
         {timeLabel && (
           <span style={{ opacity: overdue ? 0.4 : 0.65, fontSize: '0.8em', whiteSpace: 'nowrap' }}>{timeLabel}</span>
         )}
@@ -516,7 +563,12 @@ export default function TickTickList({ config = {}, style = {} }) {
                 const prio = t.priority || 0;
                 const priorityCol = priorityColor(prio);
                 const projectColor = projectColorMap[t.projectId] || '#60a5fa';
-                const color = priorityCol !== 'transparent' ? priorityCol : projectColor;
+                const taskIndex = timedTasks.indexOf(t);
+                const paletteColor = useRotatingPalette
+                  ? ROTATING_PALETTE[taskIndex % ROTATING_PALETTE.length]
+                  : null;
+                const bgColor = paletteColor || (priorityCol !== 'transparent' ? priorityCol : projectColor);
+                const leftBarColor = priorityCol !== 'transparent' ? priorityCol : (paletteColor || projectColor);
 
                 return (
                   <div
@@ -527,9 +579,9 @@ export default function TickTickList({ config = {}, style = {} }) {
                       left: timelineGutter,
                       right: 8,
                       height,
-                      background: `${color}40`,
-                      borderLeft: `3px solid ${color}`,
-                      border: `1px solid ${color}55`,
+                      background: `${bgColor}40`,
+                      borderLeft: `3px solid ${leftBarColor}`,
+                      border: `1px solid ${bgColor}55`,
                       borderLeftWidth: 3,
                       borderRadius: 4,
                       padding: '2px 6px',
